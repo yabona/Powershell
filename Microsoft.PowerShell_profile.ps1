@@ -25,7 +25,7 @@ function isAdmin {
 
 #shell cheatsheet
 function cheat {
-    Write-host "`n# Yabona's PoserShell V0.8a`n" -ForegroundColor DarkMagenta
+    Write-host "`n# Yabona's PoserShell V0.8b`n" -ForegroundColor DarkMagenta
     write-host "Test-Internet`nGet-Hardware`nGet-MemStats`nGet-ProcStats`nGet-DiskStats`nGet-IP`nGet-Staus`nGet-infoBrief"
 }
 
@@ -43,19 +43,19 @@ function StatusBar ($per) {
         $color = 'yellow'
     } elseif ($bars -lt 8) {
         $color = 'darkred'
-    } elseif ($bars -lt 10) {
+    } elseif ($bars -le 10) {
         $color = 'red'
     }
     
     #Write the statusbar to console with selected color
     Write-Host "`n [" -NoNewline -ForegroundColor $color
-    for($i=0; $i -le $bars; $i++) {
+    for($i=0; $i -lt $bars; $i++) {
         write-host "=" -NoNewline -ForegroundColor $color
     }
-    for ($i=10; $i -ge $bars; $i--) {
+    for ($i=10; $i -gt $bars; $i--) {
         write-host " " -NoNewline 
     }
-    Write-host "]" -NoNewline -ForegroundColor $color
+    Write-host "]  " -NoNewline -ForegroundColor $color
 }
 
 # connection test phase
@@ -116,7 +116,7 @@ function Get-MemStats {
     $memPer = Get-WmiObject win32_operatingsystem | Foreach {"{0:N2}" -f ((($_.TotalVisibleMemorySize - $_.FreePhysicalMemory)/ $_.TotalVisibleMemorySize) * 100) }
 
     StatusBar($memPer)
-    Write-Host "  $memper% MEMORY IN USE`n`t$memUsed GB IN USE`n`t$memAvailable GB AVAILABLE`n"
+    Write-Host "$memper% MEMORY IN USE`n`t$memUsed GB IN USE`n`t$memAvailable GB AVAILABLE`n"
 }
 
 # Retrieve processor use
@@ -125,7 +125,7 @@ function Get-ProcStats {
     $proc = ( (Get-Counter -counter "\Processor(_Total)\% Processor Time").CounterSamples[0].CookedValue ) 
     $proc = [math]::round($proc,2)
     StatusBar($proc)
-    Write-host "  $proc% CPU IN USE`n"
+    Write-host "$proc% CPU IN USE`n"
 }
 
 #Get disk info and usage, rather proud of this one..
