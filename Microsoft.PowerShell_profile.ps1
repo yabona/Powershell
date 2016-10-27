@@ -62,8 +62,10 @@ function StatusBar ($per) {
 function Test-Internet {
     if (Test-Connection 208.67.222.222 -Quiet -count 1 ) {
         write-host " [CONNECTION ACTIVE]" -ForegroundColor Green 
+        return $true
     } else {
         write-host " [CONNECTION OFFLINE]" -ForegroundColor Red 
+        return $false
     } 
 }
 
@@ -147,12 +149,19 @@ function Get-diskStats {
 #Similar to the algo used in basic setup script
 function Get-IP {
     write-host
-    Test-Internet 
+    $connectionState = Test-Internet 
     $net = Get-NetIPAddress
+    if($connectionState) 
+    {
+        $publicIP = (resolve-dnsname -name myip.opendns.com -server 208.67.222.220).ipaddress
+        Write-Host "$PublicIP`t- Public IPv4" -ForegroundColor darkgreen
+    }
     $i = 0
-    while ($i -lt $net.length) {
-        if(($net.AddressFamily[$i] -eq "IPv4") -and ($net.IPAddress[$i] -notmatch '169.254' )) {
-            write-host "$($net.IPaddress[$i]) `t-`t $($net.InterfaceAlias[$i]) " 
+    while ($i -lt $net.length) 
+    {
+        if(($net.AddressFamily[$i] -eq "IPv4") -and ($net.IPAddress[$i] -notmatch '169.254' )) 
+        {
+            write-host "$($net.IPaddress[$i]) `t- $($net.InterfaceAlias[$i]) " 
         }
         $i++
     }
@@ -181,7 +190,7 @@ function Get-infoBrief {
     #show date 
     write-host " [TODAY IS $([datetime]::now.ToShortDateString())]" -ForegroundColor Blue
 
-    test-Internet
+    $connectionState = test-Internet
 
     # administrator check phase
     if (isAdmin) {
@@ -213,4 +222,55 @@ function prompt {
     write-host " :: " -NoNewline
     write-host "[$([datetime]::Now.ToShortTimeString())]" -ForegroundColor blue -NoNewline
      "`n[$(get-location)] >> "
-    }
+}
+
+function Remove-Kebab {
+Write-host "
+
+
+                                      `.:////-..``                              
+                                 .:/smNMMMMMMMMMNNNmy+-`                        
+                            -/sdNMMNmMMMMMMMMMMMMMMMMMMNmdyso+:.`               
+                       .:+ymMMMMMMm--mMNyNMMMMMMMMMMMMMMMMMMMMMMMmho-           
+                    -/hMMMMMMMMMMMm: -NM/-mMMMMMMMMMMMMMMMMMMMMMMMMMN:          
+                 `/dMMMMMMMMMMMMMy+h..dMh`oMMMMMMMMMMMMMMMMMMMMMMMMMN/          
+                /mMMMMMMMMMMMMMMMy-hy`-NMymMMMMMMMMMMMMMMMMMMMMMMMMd:           
+             `+hMMMMMMMMMMMMMMMMMMh++`:hMMMMMMMMMMMMMMMMMMMMMMMMMm/             
+          `:omMMMMMMMMMMMMMMMMMMMMMhohMMMMMMMMMMMMMMMMMMMMMMMMMMy`              
+        -omMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNNNMMMMMMMMN/                
+      `:mMMMMMMMMMMMMMMMMMMMMMMMMMMMNmdyo+:.`          `.:/oNMMN/               
+     -dMMMMMMMMMMMMMMMMMMMMMMmhso/:.`                       hMMMNo`             
+    :hMMMMMMMMMMMMMMMMMMMMh:`                              `dMMMNs.             
+  .dNhMMMMMMMMMMMMMMMMMMMMm/`       `                      -dMMMNd-             
+   +MMMMMMMMMMMMMMMMMMMMhsho:`      /      `.`             :NMMMMd`             
+   /myNNmyosyyysNMMMMMMMMNMMMdhddm- -` -MMMMMd-`  ``      .yMMMMN+              
+    .-.`        sMMMMMMMMMMNhydMMM:    +MMMMNNMh/hdy.     /NMMNs` :.            
+                +MMMNhMMMMh/` :MMM:    sMMMMyyo`-hhh/     .mMM+  ``//           
+                sMMMmdMMMMm+./NMMM:    `+hdmNd:  ``       `mMh:::` `.           
+                :MMMmmMNNMNsyNMMMM:        `-:`           :m/  -Nh` `           
+                `NMMMMMmsysdMMMMMd.              ``       :+   /s:  /           
+                 dMMMMMMMdNMMMMMm:             ....      `/:      `+/           
+                 -NMMMMMMMMMMMMMMs    `/.     `...`      .:`     :hy.           
+                  /MMNMMMMMMMMMMMMmh` `+:                -/sh:   `/s            
+                   sd.hMMMMMMMMMMNyy+                    `/s/:-`:-``            
+                    `.dMMMMMMMMNN: -m:`     `            `y/                    
+                      -MMMMMMMMMMMmhdmNmh+.`.`           `+h/`                  
+                       mMMMMMMMMMMNsyyo/oso-..`            /MNdh/`              
+           .:++/::///odMMMMMMMMMMMMNNNNh:`   ..            oMMMMMNy/`           
+      `+sysmMMMMMMMMMMMMMMMMMMMMMMNmhy/-`   `..`     `.   .mMMMMMMMMNs-         
+     .dMMMMMMMMMMMMMMMMMMMMMMMMMMMo.``     ``.-.`  `-.    :NMMMMMMMMMMd         
+    /NMMMMMMMMMMMMMMMMMMMMMMMMMMMM:        ``.osyyys.    `yMMMMMMMMMMMd `./`    
+    yMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNs:...```.-yNNmo-     /dNMMMMMMMMMMMs .hso--` 
++h/ -NMMMMmmMMMMMMMMMMMMMMMMMMMMMMMMMMNmmmdhsoo/.   `:ohmhNMMMMMMMMMMNs.    `dd:
+hMy :NMMMMy.-hMMMMMMMMMMMMMMMMMMMMMMMMMMdo/`    `:shmNNh+oNMMMMMMMMMhsmh.  -y+-+
+MNsdMmhMMmNNy:.+mMMMMMMMMMMMMMMMMMMMMN-` .:`  -yNmmmmds/hMMMMMMMMNy-/mMNsodhoMMd
+MMMMy`hMs/mNMMd/`oNMMMMMMMMMMMMMMMMMMN.  ..:yso+hNMNhsdNMMMMMMMMh//smMMNMMMMMMMM
+MMNMs`mm::hNNoomNs/dMMMMNNMMMMMMMMMMMMs+sdhds-:sssdmMMMMMMMMMMh-`-omMMMMMMMMMMMM
+Mo-y`.NN/`yMMNo :mMMMMMMddMMMMMMM/+NMMMMMh/NMy`/ymMMMMMMMMMNdo.`-yNMMMMMMMMMMMMM
+N`.o+dMds.:hmMNshMMMMMMNoNMMMMNdMmdMMMMMsNMMMh/NMMMMMMMMMMd:ddydNMMMMMMMMMNmmMMM
+
+   ===================================================================
+   +     ~=@=~     THIS SERVER IS CERTIFIED KEBAB FREE     ~=@=~     +
+   ===================================================================
+" -ForegroundColor DarkRed
+}
