@@ -25,7 +25,7 @@ function isAdmin {
 
 #shell cheatsheet
 function cheat {
-    Write-host "`n# Yabona's PoserShell V0.7`n" -ForegroundColor DarkMagenta
+    Write-host "`n# Yabona's PoserShell V0.8a`n" -ForegroundColor DarkMagenta
     write-host "Test-Internet`nGet-Hardware`nGet-MemStats`nGet-ProcStats`nGet-DiskStats`nGet-IP`nGet-Staus`nGet-infoBrief"
 }
 
