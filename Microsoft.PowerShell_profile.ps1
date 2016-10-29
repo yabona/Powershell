@@ -10,7 +10,7 @@
 
 
 #Globals, ui options
-$host.ui.RawUI.WindowTitle = “PoserShell"
+$host.ui.RawUI.WindowTitle = â€œPoserShell"
 $user = whoami
 $fullname = Get-WmiObject win32_UserAccount | where {$_.caption -eq $user} | Select-Object Fullname | ft -Hidetableheaders | Out-String
 $fullname = $fullname.TrimStart()
@@ -26,7 +26,7 @@ function isAdmin {
 
 #shell cheatsheet
 function cheat {
-    Write-host "`n# Yabona's PoserShell V0.8b`n" -ForegroundColor DarkMagenta
+    Write-host "`n# Yabona's PoserShell V0.8c`n" -ForegroundColor DarkMagenta
     write-host "Test-Internet`nGet-Hardware`nGet-MemStats`nGet-ProcStats`nGet-DiskStats`nGet-IP`nGet-Staus`nGet-infoBrief"
 }
 
