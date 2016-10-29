@@ -10,7 +10,7 @@
 
 
 #Globals, ui options
-$host.ui.RawUI.WindowTitle = “PoserShell"
+$host.ui.RawUI.WindowTitle = "PoserShell"
 $user = whoami
 $fullname = Get-WmiObject win32_UserAccount | where {$_.caption -eq $user} | Select-Object Fullname | ft -Hidetableheaders | Out-String
 $fullname = $fullname.TrimStart()
@@ -23,6 +23,7 @@ function isAdmin {
         return $true
     }
 }
+
 
 #shell cheatsheet
 function cheat {
