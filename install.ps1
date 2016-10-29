@@ -1,4 +1,4 @@
-if $allusers {
+if ($allusers) {
 	if (!(Test-Path -Path $PROFILE.CurrentUserAllHosts)) { 
 		New-Item -Type File -Path $PROFILE.CurrentUserAllHosts -Force 
 	}
