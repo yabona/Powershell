@@ -4,7 +4,7 @@ if ($allusers) {
 	}
 	Copy-Item -path '.\Microsoft.PowerShell_profile.ps1' -destination '$PsHome\Profile.ps1'
 } else {
-	if (!(test-path -path $profile)	{
+	if (!(test-path -path $profile))	{
 		new-item -type file -path $profile -force	
 	}	
 	Copy-Item -path '.\Microsoft.PowerShell_profile.ps1' -destination $env:USERPROFILE\Documents\WindowsPowershell\Microsoft.PowerShell_Profile.ps1
