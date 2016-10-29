@@ -16,6 +16,7 @@ $fullname = Get-WmiObject win32_UserAccount | where {$_.caption -eq $user} | Sel
 $fullname = $fullname.TrimStart()
 $fullname = $fullname.TrimEnd()
 
+
 #query current user to detect "admin" credentials
 function isAdmin {
     if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544") ) {
@@ -89,6 +90,7 @@ function Get-Hardware {
     $cpuname = $cpuname.trimStart()
     $cpuname = $cpuname.trimEnd()
     Write-host "`nProcessor: `n$cpuName`n"
+    #this makes more sense when you've been sipping the black rum, trust me
     $ram = (Get-WMIObject -class Win32_PhysicalMemory | Measure-Object -Property capacity -Sum | % { [Math]::Round(($_.sum / 1GB),2) } )
     $mem = get-wmiobject -class win32_physicalmemory
     $memorySys = Get-WmiObject -Class win32_physicalMemoryArray
@@ -136,12 +138,14 @@ function Get-diskStats {
 
     while ($i -lt $disk.length) {
         $id = $disk.deviceID[$i]
-        $freePer = ((($disk.size[$i]-$disk.freespace[$i]) /$disk.size[$i]) *100 )
-        $freePer = [math]::round($freePer,2)
-    
-        statusbar($freePer)
-        write-host $freePer "% $id $($disk.volumename[$i]) `n`t$([math]::round(($disk.freespace[$i] / 1073741824),2)) GB USED `n`t$([math]::round(($disk.size[$i] / 1073741824),2)) GB TOTAL"
-        $i++
+        # protect from a divide-by-zero condition
+        if($disk.size[$i] -gt 0) {
+            $freePer = ((($disk.size[$i]-$disk.freespace[$i]) /$disk.size[$i]) *100 )
+            $freePer = [math]::round($freePer,2)
+            statusbar($freePer)
+            write-host $freePer "% $id $($disk.volumename[$i]) `n`t$([math]::round(($disk.freespace[$i] / 1073741824),2)) GB USED `n`t$([math]::round(($disk.size[$i] / 1073741824),2)) GB TOTAL"
+         }
+         $i++
     }
     write-host
 }
@@ -151,15 +155,19 @@ function Get-IP {
     write-host
     $connectionState = Test-Internet 
     $net = Get-NetIPAddress
+    #check connection state: if it's up, query OpenDNS for the public IP of the host/network
     if($connectionState) 
     {
+        # clever way of getting the public IP address, thanks OpenDNS!
         $publicIP = (resolve-dnsname -name myip.opendns.com -server 208.67.222.220).ipaddress
         Write-Host "$PublicIP`t- Public IPv4" -ForegroundColor darkgreen
     }
+
     $i = 0
     while ($i -lt $net.length) 
     {
-        if(($net.AddressFamily[$i] -eq "IPv4") -and ($net.IPAddress[$i] -notmatch '169.254' )) 
+        #exclude useless network addresses that nobody gives a fuck about
+        if(($net.AddressFamily[$i] -eq "IPv4") -and ($net.IPAddress[$i] -notmatch '169.254') -and ($net.IPaddress[$i] -notmatch '127.0.0.1') ) 
         {
             write-host "$($net.IPaddress[$i]) `t- $($net.InterfaceAlias[$i]) " 
         }
@@ -185,7 +193,7 @@ function Get-infoBrief {
     $ver = ([system.environment]::OSVersion.Version | select Build | ft -HideTableHeaders | Out-String)
     $ver = $ver.TrimStart()
     $ver = $ver.TrimEnd()
-    Write-host "`n [OS REVISION $ver]" -ForegroundColor Gray
+    Write-host " [OS REVISION $ver]" -ForegroundColor Gray
 
     #show date 
     write-host " [TODAY IS $([datetime]::now.ToShortDateString())]" -ForegroundColor Blue
@@ -207,6 +215,8 @@ function Get-infoBrief {
     Write-Host "`n`nWelcome, $fullname. "
 }
 
+#at first execution: start point: 
+
 #Prompt setup
 clear-host
 Get-infoBrief
@@ -214,6 +224,7 @@ Get-infoBrief
 #setup function for recurring prompt
 function prompt {
     write-host "[$user]" -ForegroundColor Magenta -NoNewline
+    #show user priv level
     if(IsAdmin) {
         write-host "[A]" -ForegroundColor DarkRed -NoNewline
     } else {
@@ -221,7 +232,7 @@ function prompt {
     }
     write-host " :: " -NoNewline
     write-host "[$([datetime]::Now.ToShortTimeString())]" -ForegroundColor blue -NoNewline
-     "`n[$(get-location)] >> "
+    "`n[$(get-location)] >> "
 }
 
 function Remove-Kebab {
