@@ -144,7 +144,7 @@ function Get-diskStats {
             $freePer = ((($disk.size[$i]-$disk.freespace[$i]) /$disk.size[$i]) *100 )
             $freePer = [math]::round($freePer,2)
             statusbar($freePer)
-            write-host $freePer "% $id $($disk.volumename[$i]) `n`t$([math]::round(($disk.freespace[$i] / 1073741824),2)) GB USED `n`t$([math]::round(($disk.size[$i] / 1073741824),2)) GB TOTAL"
+            write-host $freePer "% $id $($disk.volumename[$i]) `n`t$([math]::round(($disk.freespace[$i] / 1073741824),2)) GB FREE `n`t$([math]::round(($disk.size[$i] / 1073741824),2)) GB TOTAL"
          }
          $i++
     }
@@ -156,11 +156,11 @@ function Get-IP {
     write-host
     $connectionState = Test-Internet 
     $net = Get-NetIPAddress
-    #check connection state: if it's up, query OpenDNS for the public IP of the host/network
+    #check connection state: if it's up, query webservice for the public IP of the host/network
     if($connectionState) 
     {
-        # clever way of getting the public IP address, thanks OpenDNS!
-        $publicIP = (resolve-dnsname -name myip.opendns.com -server 208.67.222.220).ipaddress
+        # note- had to change this becuase their backend changed an I am too stupid to fix it
+        $PublicIP = (Invoke-restmethod http://ipinfo.io/json).ip
         Write-Host "$PublicIP`t- Public IPv4" -ForegroundColor darkgreen
     }
 
