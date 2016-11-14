@@ -125,8 +125,9 @@ function Get-MemStats {
 # Retrieve processor use
 function Get-ProcStats {
     write-host "`n### Processor Statistics ###" -NoNewline
-    $proc = ( (Get-Counter -counter "\Processor(_Total)\% Processor Time").CounterSamples[0].CookedValue ) 
-    $proc = [math]::round($proc,2)
+    #$proc = ( (Get-Counter -counter "\Processor(_Total)\% Processor Time").CounterSamples[0].CookedValue ) 
+    #$proc = [math]::round($proc,2)
+    $proc = (Get-WmiObject win32_Processor).LoadPercentage
     StatusBar($proc)
     Write-host "$proc% CPU IN USE`n"
 }
