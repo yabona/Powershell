@@ -12,10 +12,7 @@
 #Globals, ui options
 $host.ui.RawUI.WindowTitle = "PoserShell"
 $user = whoami
-$fullname = Get-WmiObject win32_UserAccount | where {$_.caption -eq $user} | Select-Object Fullname | ft -Hidetableheaders | Out-String
-$fullname = $fullname.TrimStart()
-$fullname = $fullname.TrimEnd()
-
+$fullname = (Get-WmiObject Win32_UserAccount | where {$_.Caption -eq $user}).FullName
 
 #query current user to detect "admin" credentials
 function isAdmin {
@@ -27,7 +24,7 @@ function isAdmin {
 
 #shell cheatsheet
 function cheat {
-    Write-host "`n# Yabona's PoserShell V0.8c`n" -ForegroundColor DarkMagenta
+    Write-host "`n# Yabona's PoserShell V0.11`n" -ForegroundColor Cyan
     write-host "Test-Internet`nGet-Hardware`nGet-MemStats`nGet-ProcStats`nGet-DiskStats`nGet-IP`nGet-Staus`nGet-infoBrief"
 }
 
@@ -73,39 +70,26 @@ function Test-Internet {
 
 # Retrieve hardware info and BIOS data
 function Get-Hardware {
-    $vendor = wmic csproduct get vendor 
-    $vendor = ($vendor -replace ("vendor"),('') )
-    $vendor = $vendor.TrimStart()
-    $model = wmic csproduct get name
-    $model = ($model -replace "name",'').TrimStart()
-    $model = $model.TrimEnd()
-    $serial = wmic bios get serialnumber
-    $serial = ($serial -replace ("serialnumber"),('') ).TrimStart()
-    $bios = wmic bios get Name
-    $bios = ($Bios-replace ("Name"),('') ).TrimStart()
+    # query WMI Objects for 
+    $system = (gwmi win32_computersystem)
+    $bios = (gwmi win32_bios)
     $user = whoami
-    write-host "`nCURRENT MACHINE:" -NoNewline 
-    Write-host "`n$vendor $model`n`nSerial Number: $serial`nBIOS/UEFI Revision: $bios"
-
-    $CPUname = Get-WmiObject -class win32_processor | select Name | ft -HideTableHeaders | out-string
-    $cpuname = $cpuname.trimStart()
-    $cpuname = $cpuname.trimEnd()
-    Write-host "`nProcessor: `n$cpuName`n"
-    #this makes more sense when you've been sipping the black rum, trust me
-    $ram = (Get-WMIObject -class Win32_PhysicalMemory | Measure-Object -Property capacity -Sum | % { [Math]::Round(($_.sum / 1GB),2) } )
-    $mem = get-wmiobject -class win32_physicalmemory
+   
+    write-host "`n### Current Machine ### `n$($System.manufacturer) $($system.model)`nSerial Number: $($bios.SerialNumber)`nBIOS/UEFI Revision: $($bios.Name)"
+    
+    # Processor
+    Write-host "`n### Processor ### `n$((Gwmi win32_processor).name)`n"
+    # ram
+    $ram = (Get-WMIObject -class Win32_PhysicalMemory | 
+        Measure-Object -Property capacity -Sum | % { [Math]::Round(($_.sum / 1GB),2) } )
     $memorySys = Get-WmiObject -Class win32_physicalMemoryArray
-    Write-host "Memory: `n$ram GB $($mem.speed[0])MHz memory installed"
-    Write-host "$($memorySys.maxcapacity / 1048576) GB possible on $($memorysys.memorydevices) DIMM slots"
+    Write-host "### Memory ###`n$ram GB $((gwmi win32_physicalmemory).speed[0])MHz memory installed `n$([int]$memorySys.maxcapacity / 1048576) GB possible on $($memorysys.memorydevices) DIMM slots"
     
-    $gpus = Get-WmiObject -class Win32_VideoController
-    Write-host "`nGraphics Hardware:`n$($gpus.name | Out-String)"
+    Write-host "`n### Graphics Hardware ###`n$((gwmi win32_videocontroller).name)"
+   
+    $disks = (gwmi win32_diskdrive).caption | Out-String
     
-    $disks = Get-Disk | Select-Object -property Model | ft -HideTableHeaders | Out-String
-    $disks = $disks.trimStart()
-    $disks = $disks.TrimEnd()
-    
-    Write-host "Attached Drives: `n$disks`n`n"
+    Write-host "`n### Hard Drives & SSDs ###`n$Disks`n`n"
 }
 
 # Retrieve memory objects
