@@ -205,6 +205,7 @@ function Get-infoBrief {
 
 #Prompt setup
 clear-host
+Set-PSReadlineOption -BellStyle None
 Get-infoBrief
 
 #setup function for recurring prompt
