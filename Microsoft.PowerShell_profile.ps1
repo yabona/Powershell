@@ -24,7 +24,7 @@ function isAdmin {
 
 #shell cheatsheet
 function cheat {
-    Write-host "`n# Yabona's PoserShell V0.11`n" -ForegroundColor Cyan
+    Write-host "`n# Yabona's PoserShell V0.12`n" -ForegroundColor Cyan
     write-host "Test-Internet`nGet-Hardware`nGet-MemStats`nGet-ProcStats`nGet-DiskStats`nGet-IP`nGet-Staus`nGet-infoBrief"
 }
 
@@ -165,10 +165,13 @@ function Get-IP {
 # get battery status
 function Get-Battery {
     $batt = gwmi win32_battery
+    # variable validation
+    if($batt.EstimatedChargeRemaining -ge 100) {$battPer = 99}
+    else {$battPer = $batt.estimatedChargeRemaining} 
 
     # this is shitty but it's gonna have to do
-    StatusBar($batt.EstimatedChargeRemaining)
-    Write-host "$($batt.EstimatedChargeRemaining)% BATTERY"
+    StatusBar($battPer)
+    Write-host "$($battPer)% BATTERY"
     Write-host "`t$($batt.EstimatedRunTime) MINUTES ESTIMATED RUNTIME"
 }
 
