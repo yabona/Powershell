@@ -162,6 +162,16 @@ function Get-IP {
     write-host
 }
 
+# get battery status
+function Get-Battery {
+    $batt = gwmi win32_battery
+
+    # this is shitty but it's gonna have to do
+    StatusBar($batt.EstimatedChargeRemaining)
+    Write-host "$($batt.EstimatedChargeRemaining)% BATTERY"
+    Write-host "`t$($batt.EstimatedRunTime) MINUTES ESTIMATED RUNTIME"
+}
+
 #full status: network, memory, CPU, disk, etc.
 function Get-Status {
     #actual start to this druginduced shit program...
@@ -169,6 +179,7 @@ function Get-Status {
     Get-ProcStats
     Get-MemStats
     Get-diskStats
+    Get-Battery
 
     write-host "`n`n"
 }
@@ -197,6 +208,7 @@ function Get-infoBrief {
     $mem = Get-WmiObject win32_operatingsystem | Foreach {"{0:N2}" -f ((($_.TotalVisibleMemorySize - $_.FreePhysicalMemory)*100)/ $_.TotalVisibleMemorySize) } 
     StatusBar($mem)
     Write-host " $mem% MEMORY USED " -NoNewline
+    Get-Battery
 
     Write-Host "`n`nWelcome, $fullname. "
 }
